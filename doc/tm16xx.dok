@@ -1,0 +1,275 @@
+tm16xx.h / tm16xx.c
+------------------------------------------------------------------------------------------------
+11.01.2019     R. Seelig
+
+TM1637, TM1638, TM1651 sind rudimentaere Bausteine zum Betrieb von gemultiplten
+Leuchtdiodenanzeigen mit gemeinsamer Anode (vorzugsweise 7 Segmentanzeigen).
+
+Ausserdem unterstuetzen sie zusaetzlich das Einlesen von Tastern, sodass mit ihnen
+einfache I/O Module aufgebaut werden koennen. Die vorliegende Software unterstuetzt
+( Stand 11.01.2019 ) die beiden Bausteine TM1637 und TM1651 ( TM1638 ist geplant).
+
+
+Features:
+
+TM1637
+------------------------------------------------------
+
+                                +-------------+
+                           GND  |  1       20 |  K2
+                    SEG1 / KS1  |  2   T   19 |  K1
+                    SEG2 / KS2  |  3   M   18 |  clk
+                    SEG3 / KS3  |  4       17 |  dio
+                    SEG4 / KS4  |  5   1   16 |  Vcc
+                    SEG5 / KS5  |  6   6   15 |  GRID1
+                    SEG6 / KS6  |  7   3   14 |  GRID2
+                    SEG7 / KS7  |  8   7   13 |  GRID3
+                    SEG8 / KS8  |  9       12 |  GRID4
+                         GRID6  | 10       11 |  GRID5
+                                +-------------+
+
+ - LED-Treiber fuer maximal 6 x 8 Leuchtdioden ( sechs 7-Segmentanzeigen mit dp)
+ - maximal 16 Tasten
+
+TM1651
+------------------------------------------------------
+
+ - LED-Treiber fuer maximal 4 x 7 Leuchtdioden ( vier 7-Segmentanzeigen ohne dp)
+ - maximal 7 Tasten
+
+                                +-------------+
+                           GND  |  1       20 |  K1
+                    SEG1 / KS1  |  2   T   19 |  clk
+                    SEG2 / KS2  |  3   M   18 |  dio
+                    SEG3 / KS3  |  4       17 |  Vcc
+                    SEG4 / KS4  |  5   1   16 |  GRID1
+                    SEG5 / KS5  |  6   6   15 |  GRID2
+                    SEG6 / KS6  |  7   5   14 |  GRID3
+                    SEG7 / KS7  |  8   1   13 |  GRID4
+                                +-------------+
+
+------------------------------------------------------
+
+Die Bausteine werden ueber 2 Leitungen seriell synchron angesprochen. Das Kommunikations-
+protokoll ist etwas "gewoehnungsbeduerftig".
+
+Das Timing der Bausteine entspricht dem des gaengigen I2C Busses. Jedoch koennen
+die Bausteine NICHT adressiert werden, d.h. sie haben keine Geraeteadresse und
+stehen nach einem Startsignal auf dem Bus auf Empfang. Sie quittieren jedes Byte,
+egal welches, mit einem Acknowledge.
+
+Das senden eines Wertes erfolgt mit dem niederwertigsten Bit zuerst (im Gegensatz
+zu vielen I2C Devices, bei dem ein hoeherwertiges Bit zuerst gesendet wird).
+
+
+Der Anschluss des Bausteins an 7-Segmentanzeigen geschieht folgendermassen:
+
+     a
+    ---
+ f | g | b       Segment |  a   |  b   |  c   |  d   |  e   |  f   |  g   | Dezimalpunkt (dp) |
+    ---          ------------------------------------------------------------------------------
+ e |   | c       Anschl. | SEG1 | SEG2 | SEG3 | SEG4 | SEG5 | SEG6 | SEG7 |            SEG8   |
+    ---  .
+     d
+
+GRID1 steuert die hoechstwertigste Stelle der anzeige an
+
+
+GRID-Anschluesse fuer 4 stellige Anzeige
+------------------------------------------------------------
+
+      GRID1   GRID2   GRID2   GRID4
+    .................................
+    .   _   .   _   .   _   .   _   .
+    .  |_|  .  |_|  .  |_|  .  |_|  .
+    .  |_|  .  |_|  .  |_|  .  |_|  .
+    .................................
+
+
+GRID-Anschluesse fuer 6 stellige Anzeige
+------------------------------------------------------------
+
+      GRID1   GRID2   GRID2   GRID4   GRID5   GRID6
+    .................................................
+    .   _   .   _   .   _   .   _   .   _   .   _   .
+    .  |_|  .  |_|  .  |_|  .  |_|  .  |_|  .  |_|  .
+    .  |_|  .  |_|  .  |_|  .  |_|  .  |_|  .  |_|  .
+    .................................................
+
+
+Tastenanschluesse
+------------------------------------------------------------
+
+Die Anschluesse der TM16xx haben an den Pins doppelte Funktionen, d.h. die Anschluesse, die
+zu den Segmenten der Anzeige gehen, gehen auch zu den Tasten.
+
+Beim TM1651 gibt es eine Tastenreihe mit 7 Tastern, beim TM1637 2 Tastenreihen zu je 8 Tastern.
+
+Die Taster haben somit den gleichen Anschluss wie die Segmente der Anzeige. Jede Tasterreihe
+ist auf der einen Seite mit SEGx / KSx verbunden, der andere Anschluss geht an K1 oder K2
+
+Es wird keine Tastenmatrix gescannt, d.h. der Baustein wird die Nummer der hoechsten gedrueckten
+Taste zurueck liefern.
+
+Die Software
+------------------------------------------------------------------------------------------------
+
+###################################################################
+                               tm16xx.h
+###################################################################
+
+Hier muss der Benutzer 3 Angaben taetigen:
+
+  enable_6digit bestimmt, ob am Bausein eine 4- oder 6-stellige Anzeige angeschlossen ist.
+  Fuer den Betrieb mit einem TM1651 ist hier immer 0 anzugeben
+
+  #define enable_6digit  0         // Code fuer 6-stellige Anzeige
+                                   // inkludieren
+
+
+  Festlegen, mit welchen Pins der TM16xx mit dem Controller verbunden ist
+
+  /* ----------------------------------------------------------
+            Anschluss CLK und DIO  an den Controller
+     ---------------------------------------------------------- */
+  // DIO nach PB0
+  #define bb_datport     B
+  #define bb_datbitnr    0
+
+  // CLK nach PB1
+  #define bb_clkport     B
+  #define bb_clkbitnr    1
+
+
+###################################################################
+                               tm16xx.c
+###################################################################
+
+tm16xx.c enthaelt die fuer den Betrieb erforderlichen Funktionen. Diese sind:
+
+----------------------------------------------------------
+       void tm16_init(void)
+----------------------------------------------------------
+
+       initialisiert die Anschluesse des Controllers zur
+       Kommunikation mit dem TM16xx Baustein und loescht die
+       Anzeige
+
+
+----------------------------------------------------------
+       void tm16_setbright(uint8_t value)
+
+       setzt die Helligkeit der Anzeige, erlaubte Werte fuer
+       value sind 0..15 . 0 = aus, 15 = max. Helligkeit
+
+
+----------------------------------------------------------
+       void tm16_clear(void)
+
+       loescht die Anzeige (alle Segmente aus)
+
+
+----------------------------------------------------------
+       void tm16_setbmp(uint8_t pos, uint8_t value)
+
+       gibt ein "Bitmuster" auf einer Anzeigenstelle aus.
+       Hierdurch ist es moeglich, jedes einzelne Segment einer
+       Anzeige anzusteuern.
+
+       pos:
+         Anzeigeposition, auf der das Bitmuster ausgege ben
+         werden soll. pos = 0 entspricht der linken (hoechst
+         wertigen) Anzeige
+
+       value:
+          anzuzeigendes Bitmuster
+
+
+----------------------------------------------------------
+       void tm16_setzif(uint8_t pos, uint8_t zif)
+
+       gibt ein Ziffer an der angegebenen Position aus.
+       Position 0 ist die linke (hoechstwertige) Stelle
+
+       pos:
+         Anzeigeposition, auf der das Bitmuster ausgege ben
+         werden soll. pos = 0 entspricht der linken (hoechst
+         wertigen) Anzeige
+
+       zif:
+          anzuzeigende Ziffer
+
+----------------------------------------------------------
+       void tm16_setseg(uint8_t pos, uint8_t seg)
+
+       setzt ein einzelnes Segment einer Anzeige.
+       Position 0 ist die linke (hoechstwertige) Stelle.
+
+       pos:
+         Anzeigeposition, auf der das Bitmuster ausgege ben
+         werden soll. pos = 0 entspricht der linken (hoechst
+         wertigen) Anzeige
+
+       seg:
+          anzuzeigendes Segment. Segment A = 0
+
+
+----------------------------------------------------------
+       void tm16_setdez(int value, uint8_t dpanz)
+
+       gibt einen 4-stelligen dezimalen Wert auf der
+       Anzeige aus
+
+      value:
+        auszugebender Wert
+
+       dpanz:
+         Position der Anzeige Dezimalpunkt, 1 entspricht
+         Anzeige rechts (und somit keine Nachkommastelle)
+         0 => es erfolgt keine Anzeige
+
+----------------------------------------------------------
+       void tm16_setdez6digit(uint32_t value, uint8_t dpanz)
+
+       gibt einen 6-stelligen dezimalen Wert auf der
+       Anzeige aus
+
+       value:
+         auszugebender Wert
+
+       dpanz:
+         Position der Anzeige Dezimalpunkt, 1 entspricht
+         Anzeige rechts (und somit keine Nachkommastelle)
+         0 => es erfolgt keine Anzeige
+
+----------------------------------------------------------
+       void tm16_sethex(uint16_t value)
+
+       gibt einen 4-stelligen hexadezimalen Wert auf der
+       Anzeige aus
+
+       value:
+         auszugebender Wert
+
+
+----------------------------------------------------------
+       void tm16_sethex6digit(uint32_t value)
+
+       gibt einen 6-stelligen hexadezimalen Wert auf der
+       Anzeige aus
+
+       value:
+         auszugebender Wert
+
+
+----------------------------------------------------------
+      uint8_t tm16_readkey(void)
+
+      liest angeschlossene Tasten ein und gibt dieses als
+      Argument zurueck.
+
+      Es wird keine Tastenmatrix zurueck geliefert. Ist
+      mehr als eine Taste aktiviert, wird nur die hoechste
+      Taste zurueck geliefert. Somit ist es nicht moeglich
+      mehrere Tasten gleichzeitig zu betaetigen.
+

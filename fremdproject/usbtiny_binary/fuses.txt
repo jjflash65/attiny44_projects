@@ -1,0 +1,10 @@
+ATtiny44
+------------------------
+
+Externer Quarz > 8 MHz
+
+Fuses:
+
+  LO : 0xEF
+  HI : 0xDF
+ 

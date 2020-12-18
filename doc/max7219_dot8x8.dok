@@ -1,0 +1,189 @@
+max7219_dot8x8.h / max7219_dot8x8.c
+-------------------------------------------------------------------------------
+24.09.2018    R. Seelig
+
+Der MAX7219 ist ein LED Treiber, der 8 Segmente zu je 8 Digits multiplexen kann. Die
+Datenkommunikation erfolgt seriell.
+
+Vorzugsweise werden an diesen Baustein 7-Segmentanzeigen bis zu maximal 8 Stellen an-
+geschlossen.
+
+Das Softwaremodul max7219_dot8x8 hat jedoch eine 8x8 Leuchtdiodenmatrix angeschlossen
+(Chinamodul).
+
+                              +-----------------+
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              | o o o o o o o o |
+                              |                 |
+                              +-----------------+
+                              |+---------------+|
+                              ||    MAX7219    ||
+                              |+---------------+|
+                              +- |  |  |  |  | -+
+                                 |  |  |  |  |
+
+                                 V  G  D  C  C
+                                 c  N  i  S  L
+                                 c  D  n     K
+
+Die Anschlussbezeichnung "CS" ist etwas irrefuehrend, da es sich funktional eher um einen
+STROBE / LOAD Anschluss handelt, der dafuer sorgt, dass die an den Baustein gesendeten
+Daten in sein internes RAM uebernommen werden.
+
+Das Softwaremodul unterteilt sich in 3 Einheiten:
+
+- serielle Kommunikation (via Bitbanging)
+- beschreiben des MAX7219
+- Verwendung der DOT8x8 Anzeige mit Putpixel, Bitmap oder Schriftzeichen
+
+max7219 benoetigt zur Darstellung von Schriftzeichen ein hinzulinken von
+                                  font8x8h
+
+-----------------------------------------------------------
+Header-File
+-----------------------------------------------------------
+
+Das Headerfile beinhaltet:
+
+- Pinanschluesse des Moduls an einen ATtiny44
+- Makros zum Setzen/Reseten der Anschlussleitungen
+- Makro zum Initialisieren der I/O Pins
+- Funktionsprototypen
+
+-----------------------------------------------------------
+Kommunikation:
+-----------------------------------------------------------
+
+  void serout(uint8_t data);
+
+    serielle Datenausgabe. Der Wert in <data> wird seriell an den MAX7219 mit MSB zuerst
+    gesendet.
+
+-----------------------------------------------------------
+MAX7219 Funktionen:
+-----------------------------------------------------------
+
+  void m7219_init();
+  ------------------
+     Setzt die Anschluesse an die der MAX7219 angeschlossen ist  als Ausgaenge und
+     intitalisiert die Register des ICs
+
+
+  void m7219_clrscr();
+  --------------------
+     loescht die gesamte Matrixanzeige
+
+
+  void m7219_col(uint8_t digit, uint8_t value);
+  ---------------------------------------------
+     Setzt einen 8 Bit-Wert ( = 8 "Pixel") in eine Spalte (column) der LED-Matrix.
+
+     digit : Spalte, die beschrieben werden soll
+     data  : Wert, mit der die Spalte beschrieben wird
+             (8 Pixel)
+
+
+  void m7219_setbmp(uint8_t *bmp);
+  --------------------------------
+     Zeichnet ein gesamtes 8x8 Pixel grosses "Bitmap* auf die LED-Matrix.
+
+        *bmp  : Zeiger auf einen 8 Bytes ( = 64 Bits) grossen
+                Speicher im RAM, der als 8x8 "Bitmap" ausgegeben wird
+
+  void m7219_setprmbmp(uint8_t *bmp);
+  -----------------------------------
+        *bmp  : Zeiger auf einen 8 Bytes ( = 64 Bits) grossen
+                Speicher im Codespeicher, der als 8x8 "Bitmap" ausgegeben wird
+
+  Hinweis: Die Unterscheidung zwischen RAM und Codespeicher ist der Speicherorganisation
+           der AVR-Controller geschuldet, da Daten im Codespeicher nicht linear abgelegt
+           sind.
+
+
+-----------------------------------------------------------
+Framebuffer
+-----------------------------------------------------------
+
+  Um einzelne Pixel und/oder Schriftzeichen auf der Dotmatrix ausgeben zu koennen bedarf
+  es eines kleinen Framebuffers, innerhalb derer einzelne  Pixel (LED's) gesetzt oder
+  geloescht werden koennen. Dies geschieht (wie auch bei "normalen" Framebuffern fuer
+  grosse Monitore) im RAM und ist somit rein virtuell. Fuer den Framebuffer wird ein
+  8 Byte grosses Array definiert (<fbuf>).
+
+  Deklaration des Framebuffers:
+  -----------------------------
+    extern uint8_t fbuf[8];
+
+
+  Der Framebuffer wird mit:
+
+     m7219_setbmp(&fbuf[0]);
+
+   auf der Dotmatix angezeigt.
+
+  Um Buchstaben darstellen zu koennen, wird ein Schriftstilsatz font8x8h benoetigt,
+  der hinzugelinkt werden muss.
+
+
+-----------------------------------------------------------
+Framebuffer Funktionen
+-----------------------------------------------------------
+
+
+  void fbuf_clr(uint8_t *dest);
+  ----------------------------
+     loescht einen 8 Byte grossen Pufferspeicher in dem alle darin enthaltenen 64 Bits
+     geloescht werden.
+
+     Usage: fbuf_clr(&fbuf[0]);
+
+
+  void fbuf_putpixel(uint8_t *dest, uint8_t x, uint8_t y, uint8_t c);
+  ------------------------------------------------------------------
+     setzt in einem 8 Byte grossen Pufferspeicher ein einzelnes Bit (Pixel)
+
+     Parameter
+
+        *dest : Zeiger auf einen 8 Byte grossen Pufferspeicher
+        x     : X-Koordinate des zu setzenden Pixels
+        y     : Y-Koordinate des zu setzenden Pixels
+        c     : "Farbe" = 1 : LED leuchtet
+                        = 0 : LED aus
+
+
+  void fbuf_shl_ins(uint8_t *dest, uint8_t src);
+  ----------------------------------------------
+     verschiebt alle Spalten des Zielspeichers *dest um eine
+     Stelle nach links und fuegt an der rechten Stelle eine
+     Spalte aus src ein
+
+
+  void fbuf_scroll_in(uint8_t *src, int dtime);
+  --------------------------------------------;
+     "Scrollt" ein 8x8 grosses Image von links in die LED-
+     matrix, die in *dest enthalten ist, ein.
+
+       *dest : Zielimage (das letztendlich angezeigt wird)
+       *src  : einzuscrollendes Image
+       dtime : Scrollgeschwindigkeit in mS
+
+
+  void fbuf_scroll_text_in(uint8_t *dest, uint8_t *txt, int dtime1, int dtime2);
+  ---------------------------------------------------------- -------------------
+     Scrollt einen Text (der im RAM liegt) in die Matrix ein und wartet nach
+     jedem eingescrollten Buchstaben eine Zeitdauer, bevor der naechste Buchstabe
+     eingeschoben wird.
+
+       *txt   : Zeiger auf den Text, der auf der LED-Matrix
+                angezeigt werden soll
+       dtime1 : Zeidauer in mS zwischen den Scrollschritten
+       dtime2 : Zeitdauer in mS die ein Buchstabe auf der
+                LED-Matrix angezeigt wird, bevor der naechste
+                Buchstabe eingescrollt wird.

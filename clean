@@ -1,0 +1,324 @@
+cd blink
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd blink_timer0
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd blink_timer0int
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd charlie20
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd dht11
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd hc595_2digit
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd hc595_4digit
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd hc595_4digit_adc
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd hc_sr04_ultraschall
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd hd44780
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd hd44780_i2c
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd i2c_busscan
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd include
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd ir_receiver
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd lcd_7segment
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd max7219
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd melodie
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd millis
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd n5110
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd ntc
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd oled1306_i2c
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd oled1306_rotated
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd oled1306_spi
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd pwm
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd rda5807_ukw
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd rf433_rx
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd rf433_tx
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd rtc_i2c
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd serial_usi
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd servo
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd shiftreg
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd simon
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd release
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+cd ..
+
+cd src
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd stepper
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd tft_display
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd timer1_intervall
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd tms1637_4digit
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd vfd_samsung
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+cd ws2812
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
+cd ..
+
+rm -f *.elf
+rm -f *.hex
+rm -f *.o
+rm -f cide.*
+rm -f *.bak
